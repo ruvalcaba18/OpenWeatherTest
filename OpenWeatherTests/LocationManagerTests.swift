@@ -59,6 +59,7 @@ final class LocationManagerTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
+        
         mockLocationManager = MockCLLocationManager()
         locationManager = LocationManager()
         

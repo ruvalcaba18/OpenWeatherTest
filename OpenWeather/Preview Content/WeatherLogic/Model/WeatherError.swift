@@ -45,6 +45,8 @@ enum WeatherError: LocalizedError, Equatable {
               
           case (.locationUnavailable, .locationUnavailable):
               return true
+            case (.noInternetConnection, .noInternetConnection):
+              return true
               
           default:
               return false

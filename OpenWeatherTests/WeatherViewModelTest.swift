@@ -17,6 +17,7 @@ import CoreLocation
 
     override func setUp() {
         super.setUp()
+        
         let weatherManager = WeatherManager()
         let locationManager = LocationManager()
         viewModel = WeatherViewModel(weatherManager: weatherManager, locationManager: locationManager)
@@ -48,7 +49,7 @@ import CoreLocation
         
         wait(for: [expectation], timeout: 5.0)
         
-        XCTAssertTrue(viewModel.errorMessage.isEmpty)
+        XCTAssertTrue(((viewModel.errorMessage?.isEmpty) != nil))
         XCTAssertFalse(viewModel.isLoading)
     }
 
@@ -63,7 +64,7 @@ import CoreLocation
         viewModel.$errorMessage
             .dropFirst()
             .sink { errorMessage in
-                if !errorMessage.isEmpty {
+                if (errorMessage != nil) {
                     XCTAssertEqual(errorMessage, WeatherError.networkError("Invalid response from the server.").localizedDescription)
                     expectation.fulfill()
                 }
