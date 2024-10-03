@@ -6,30 +6,104 @@
 //
 
 import XCTest
+import CoreLocation
 
-final class LocationManagerTests: XCTestCase {
+@testable import OpenWeather
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-    }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+fileprivate final class MockCLLocationManager: CLLocationManager {
+    
+    var mockAuthorizationStatus: CLAuthorizationStatus = .notDetermined
+    var mockLocations: [CLLocation] = []
+    weak var mockDelegate: CLLocationManagerDelegate?
+    
+    override var delegate: CLLocationManagerDelegate? {
+        
+        get {
+            
+            return super.delegate
+            
+        }
+        
+        set {
+            
+            super.delegate = newValue
         }
     }
+    
+    override var authorizationStatus: CLAuthorizationStatus {
+        
+        return mockAuthorizationStatus
+    }
+    
+    override func requestWhenInUseAuthorization() {
+        
+        mockAuthorizationStatus = .authorizedWhenInUse
+        mockDelegate?.locationManagerDidChangeAuthorization?(self)
+    }
+    
+    override func startUpdatingLocation() {
+        
+        if !mockLocations.isEmpty {
+            
+            mockDelegate?.locationManager?(self, didUpdateLocations: mockLocations)
+        }
+    }
+    
+    
+}
 
+final class LocationManagerTests: XCTestCase {
+    
+    var locationManager: LocationManager!
+    fileprivate var mockLocationManager: MockCLLocationManager!
+    
+    override func setUp() {
+        super.setUp()
+        mockLocationManager = MockCLLocationManager()
+        locationManager = LocationManager()
+        
+        mockLocationManager.mockDelegate = locationManager
+    }
+    
+    override func tearDown() {
+        
+        locationManager = nil
+        mockLocationManager = nil
+        
+        super.tearDown()
+        
+    }
+    
+
+    func testCheckLocationAuthorizationWhenAuthorized() {
+        
+        mockLocationManager.mockAuthorizationStatus = .authorizedWhenInUse
+        locationManager.checkLocationAuthorization()
+        
+        XCTAssertEqual(locationManager.authorizationStatus, .authorizedWhenInUse)
+        XCTAssertFalse(locationManager.isPermissionDenied)
+    }
+    
+    func testDidUpdateLocations() {
+        
+        let mockLocation = CLLocation(latitude: 37.7749, longitude: -122.4194)
+        mockLocationManager.mockLocations = [mockLocation]
+        
+        mockLocationManager.mockAuthorizationStatus = .authorizedWhenInUse
+        locationManager.checkLocationAuthorization()
+        
+        mockLocationManager.startUpdatingLocation()
+        
+        XCTAssertEqual(locationManager.currentLocation?.coordinate.latitude, mockLocation.coordinate.latitude)
+        XCTAssertEqual(locationManager.currentLocation?.coordinate.longitude, mockLocation.coordinate.longitude)
+    }
+    
+    func testDidFailWithError() {
+        
+        let error = NSError(domain: "TestError", code: 1, userInfo: nil)
+        
+        locationManager.locationManager(mockLocationManager, didFailWithError: error)
+        
+        XCTAssertEqual(locationManager.errorMessage, "Failed to find user's location: The operation couldn’t be completed. (TestError error 1.)")
+    }
 }

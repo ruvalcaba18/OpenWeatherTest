@@ -8,34 +8,49 @@
 import XCTest
 
 final class WeatherViewUITests: XCTestCase {
-
+    
+    var app: XCUIApplication!
+    
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func testExample() throws {
-        // UI tests must launch the application that they test.
-        let app = XCUIApplication()
+        app = XCUIApplication()
         app.launch()
-
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
+    
+    func testInitialState() throws {
+        
+        let fetchWeatherButton = app.buttons["fetchWeatherButton"]
+        XCTAssertTrue(fetchWeatherButton.exists, "Fetch Weather Button should exist on screen.")
+        
+        let errorMessageView = app.staticTexts["errorMessageView"]
+        XCTAssertTrue(errorMessageView.exists, "Error message view should be present.")
+        
+    }
+    
+    func testLoadingWeather() throws {
+        
+        let fetchWeatherButton = app.buttons["fetchWeatherButton"]
+        XCTAssertTrue(fetchWeatherButton.exists, "Fetch Weather Button should exist on screen.")
+        fetchWeatherButton.tap()
+        
+        let progressView = app.activityIndicators["weatherProgressView"]
+        XCTAssertTrue(progressView.exists, "Progress view should appear while loading.")
+    }
+    
+    func testSuccessfulWeatherLoad() throws {
+        
+        let fetchWeatherButton = app.buttons["fetchWeatherButton"]
+        fetchWeatherButton.tap()
 
-    func testLaunchPerformance() throws {
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
-            // This measures how long it takes to launch your application.
-            measure(metrics: [XCTApplicationLaunchMetric()]) {
-                XCUIApplication().launch()
-            }
-        }
+        let cityLabel = app.staticTexts["cityTitleView"]
+        XCTAssertTrue(cityLabel.waitForExistence(timeout: 5), "City label should be visible after successful data load.")
+        
+        let temperatureLabel = app.staticTexts["temperatureLabel"]
+        let humidityLabel = app.staticTexts["humidityLabel"]
+        let descriptionLabel = app.staticTexts["descriptionLabel"]
+        
+        XCTAssertTrue(temperatureLabel.waitForExistence(timeout: 5), "City label should be visible after successful data load.")
+        XCTAssertTrue(humidityLabel.waitForExistence(timeout: 5), "City label should be visible after successful data load.")
+        XCTAssertTrue(descriptionLabel.waitForExistence(timeout: 5), "City label should be visible after successful data load.")
     }
 }

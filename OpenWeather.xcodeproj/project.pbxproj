@@ -182,6 +182,7 @@
 					};
 					188246FB2CADA6AD00F7C464 = {
 						CreatedOnToolsVersion = 16.0;
+						LastSwiftMigration = 1600;
 						TestTargetID = 188246E12CADA6AC00F7C464;
 					};
 				};
@@ -399,6 +400,8 @@
 				DEVELOPMENT_TEAM = J58ZDFPQ77;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "We need access to your location at all times to provide accurate weather updates.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to show you the weather information.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -428,6 +431,8 @@
 				DEVELOPMENT_TEAM = J58ZDFPQ77;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "We need access to your location at all times to provide accurate weather updates.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to show you the weather information.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -487,6 +492,7 @@
 		1882470D2CADA6AD00F7C464 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = J58ZDFPQ77;
@@ -495,6 +501,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.OpenWeatherUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = OpenWeather;
@@ -504,6 +511,7 @@
 		1882470E2CADA6AD00F7C464 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = J58ZDFPQ77;

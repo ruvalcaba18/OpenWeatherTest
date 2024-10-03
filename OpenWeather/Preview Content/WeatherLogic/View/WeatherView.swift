@@ -9,11 +9,19 @@ import SwiftUI
 
 struct WeatherView: View {
     
-    @StateObject var viewModel = WeatherViewModel()
-    
+    @StateObject var viewModel: WeatherViewModel
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-
+    
+    init(weatherManager: WeatherManager = WeatherManager(), locationManager: LocationManager = LocationManager()) {
+        
+        _viewModel = StateObject(wrappedValue: WeatherViewModel(weatherManager: weatherManager, locationManager: locationManager))
+        
+    }
+    
+    
+    
     @ViewBuilder func progressView() -> some View {
+        
         ProgressView("Loading...")
     }
     
@@ -22,7 +30,6 @@ struct WeatherView: View {
         Text(viewModel.errorMessage)
             .foregroundColor(.red)
             .padding()
-
     }
     
     @ViewBuilder private func renderButtonView() -> some View {
@@ -33,64 +40,85 @@ struct WeatherView: View {
                 await viewModel.fetchWeatherForCurrentLocation()
             }
             
-        }) {
+        },label: {
+            
             Text("Get Weather for your city")
                 .padding()
                 .background(Color.blue)
                 .foregroundColor(.white)
                 .cornerRadius(8)
-        }
+            
+        })
     }
     
     @ViewBuilder private func renderPortraitView(withWeather weather: Weather) -> some View {
-
+        
         VStack {
+            
             WeatherDetailsView(weather: weather)
+            
             WeatherIconView(weather: weather)
         }
-        
     }
     
     @ViewBuilder private func renderLandscapeView(withWeather weather: Weather) -> some View {
-
-        HStack {
-            WeatherDetailsView(weather: weather)
-            WeatherIconView(weather: weather)
-        }
         
+        HStack {
+            
+            WeatherDetailsView(weather: weather)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Spacer()
+            
+            WeatherIconView(weather: weather)
+                .frame(width: 200, height: 200)
+                .padding()
+        }
+        .padding()
     }
     
     var body: some View {
+        
         NavigationView {
-            VStack(spacing:0) {
+            
+            ScrollView{
                 
-                if viewModel.isLoading {
-                    progressView()
-                } else if let weather = viewModel.weather {
-                    Text("City: \(weather.name)")
-                        .font(.largeTitle)
-                        .padding()
+                VStack(spacing: 0) {
                     
-                    if horizontalSizeClass == .compact {
+                    if viewModel.isLoading {
                         
-                        renderPortraitView(withWeather: weather)
+                        progressView()
+                            .accessibilityIdentifier("weatherProgressView")
+                        
+                    } else if let weather = viewModel.weather {
+                        
+                        Text("City: \(weather.name)")
+                            .font(.largeTitle)
+                            .padding()
+                            .accessibilityIdentifier("cityTitleView")
+                        
+                        if horizontalSizeClass == .compact {
+                            renderPortraitView(withWeather: weather)
+                        } else {
+                            renderLandscapeView(withWeather: weather)
+                        }
                         
                     } else {
-                        renderLandscapeView(withWeather: weather)
+                        renderErrorView()     .accessibilityIdentifier("errorMessageView")
                     }
                     
-                } else {
-                    renderErrorView()
+                    renderButtonView()
+                        .accessibilityIdentifier("fetchWeatherButton")
                 }
-                
-                renderButtonView()
-            }.task {
-                if !viewModel.isPermissionDenied {
-                    viewModel.checkLocationAuthorization()
+                .searchable(text: $viewModel.searchQuery, prompt: "Search for a city")
+                .task {
+                    if !viewModel.isPermissionDenied {
+                        viewModel.checkLocationPermission()
+                    }
                 }
+                .padding()
             }
-            .searchable(text: <#T##Binding<String>#>)
-            .padding()
+            .accessibilityIdentifier("weatherScrollView")
         }
     }
 }

@@ -6,30 +6,38 @@
 //
 
 import XCTest
+@testable import OpenWeather
 
 final class WeatherErrorTests: XCTestCase {
+    
+    func testErrorDescriptions() {
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        let invalidURLError = WeatherError.invalidURL
+        XCTAssertEqual(invalidURLError.errorDescription, "The weather service is currently unavailable. Please try again later.")
+  
+        let networkError = WeatherError.networkError("No internet connection.")
+        XCTAssertEqual(networkError.errorDescription, "No internet connection.")
+
+        let decodingError = WeatherError.decodingError
+        XCTAssertEqual(decodingError.errorDescription, "Failed to decode the weather data. Please try again.")
+        
+        let locationUnavailableError = WeatherError.locationUnavailable
+        XCTAssertEqual(locationUnavailableError.errorDescription, "Could not determine your location.")
     }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    
+    func testEquatableConformance() {
+        
+        XCTAssertEqual(WeatherError.invalidURL, WeatherError.invalidURL)
+        
+        XCTAssertEqual(WeatherError.networkError("No internet connection."), WeatherError.networkError("No internet connection."))
+        
+        XCTAssertNotEqual(WeatherError.networkError("No internet connection."), WeatherError.networkError("Timeout error."))
+        
+        XCTAssertEqual(WeatherError.decodingError, WeatherError.decodingError)
+        
+        XCTAssertEqual(WeatherError.locationUnavailable, WeatherError.locationUnavailable)
+    
+        XCTAssertNotEqual(WeatherError.invalidURL, WeatherError.decodingError)
     }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-    }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
-
+    
 }

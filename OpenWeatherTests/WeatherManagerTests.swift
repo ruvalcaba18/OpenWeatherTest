@@ -6,30 +6,77 @@
 //
 
 import XCTest
+import CoreLocation
+
+@testable import OpenWeather
 
 final class WeatherManagerTests: XCTestCase {
-
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+    
+    var weatherManager: WeatherManager!
+    
+    override func setUp() {
+        super.setUp()
+        weatherManager = WeatherManager()
     }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    
+    override func tearDown() {
+        weatherManager = nil
+        super.tearDown()
     }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+    
+    func testGetWeatherForValidCity() async throws {
+        
+        let city = "London"
+        
+        do {
+            let weather = try await weatherManager.getWeather(for: city)
+            XCTAssertEqual(weather.name, "London")
+            XCTAssertGreaterThan(weather.main.temp, -50)
+        } catch {
+            XCTFail("Fetching weather failed with error: \(error)")
+        }
+        
     }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+    
+    func testGetWeatherForInvalidCity() async throws {
+        
+        let city = "InvalidCityName1234"
+        
+        do {
+            _ = try await weatherManager.getWeather(for: city)
+            XCTFail("This request should fail for an invalid city.")
+        } catch let error as WeatherError {
+            XCTAssertEqual(error, .networkError("Invalid response from the server."))
+        } catch {
+            XCTFail("Unexpected error: \(error.localizedDescription)")
         }
     }
-
+    
+    func testGetWeatherForValidLocation() async throws {
+        
+        let location = CLLocation(latitude: 37.7749, longitude: -122.4194)
+        
+        do {
+            let weather = try await weatherManager.getWeather(for: location)
+            XCTAssertEqual(weather.name, "San Francisco")
+            XCTAssertGreaterThan(weather.main.temp, -50)
+        } catch {
+            XCTFail("Fetching weather failed with error: \(error)")
+        }
+    }
+    
+    func testGetWeatherForInvalidLocation() async throws {
+        
+        let location = CLLocation(latitude: 1000, longitude: 1000)
+        
+        do {
+            _ = try await weatherManager.getWeather(for: location)
+            XCTFail("This request should fail for invalid coordinates.")
+        } catch let error as WeatherError {
+            XCTAssertEqual(error, .networkError("Invalid response from the server."))
+        } catch {
+            XCTFail("Unexpected error: \(error.localizedDescription)")
+        }
+    }
+    
 }
