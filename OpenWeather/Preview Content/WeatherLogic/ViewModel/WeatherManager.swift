@@ -32,11 +32,20 @@ final class WeatherManager {
                 throw WeatherError.decodingError
             }
             
-        } catch {
+        } catch let urlError as URLError {
+          
+            if urlError.code == .notConnectedToInternet {
+                throw WeatherError.noInternetConnection
+            } else {
+                throw WeatherError.networkError(urlError.localizedDescription)
+            }
             
+        } catch {
             throw WeatherError.networkError(error.localizedDescription)
         }
+        
     }
+
     
     
     func getWeather(for city: String) async throws -> Weather {

@@ -14,7 +14,7 @@ import Combine
     private let locationManager: LocationManager
     
     @Published var weather: Weather?
-    @Published var errorMessage: String = ""
+    @Published var errorMessage: String? = nil
     @Published var isLoading: Bool = false
     @Published var isPermissionDenied: Bool = false
     @Published var searchQuery: String = "" {
@@ -40,7 +40,7 @@ import Combine
     func fetchWeather(for city: String) async {
         
         isLoading = true
-        
+        errorMessage = nil
         do {
             weather = try await weatherManager.getWeather(for: city)
             errorMessage = ""
@@ -53,6 +53,8 @@ import Combine
     }
     
     func fetchWeatherForCurrentLocation() async {
+        
+        errorMessage = nil
         
         guard let location = locationManager.currentLocation else {
             errorMessage = WeatherError.locationUnavailable.localizedDescription

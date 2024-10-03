@@ -16,7 +16,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     @Published var currentLocation: CLLocation?
     @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined
     @Published var isPermissionDenied: Bool = false
-    @Published var errorMessage: String = ""
+    @Published var errorMessage: String? = ""
     
     override init() {
         
@@ -64,6 +64,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
             
         case .denied, .restricted:
             isPermissionDenied = true
+            errorMessage = "Please turn on location services in your device settings"
             break;
             
         default:
@@ -79,7 +80,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         
-        errorMessage = "Failed to find user's location: \(error.localizedDescription)"
+        errorMessage = "Failed to find your user's location 😅"
         
     }
     

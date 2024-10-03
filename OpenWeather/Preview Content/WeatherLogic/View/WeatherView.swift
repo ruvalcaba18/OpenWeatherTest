@@ -26,10 +26,15 @@ struct WeatherView: View {
     }
     
     @ViewBuilder private func renderErrorView() -> some View {
-        
-        Text(viewModel.errorMessage)
-            .foregroundColor(.red)
-            .padding()
+        VStack{
+            Image("friendly_error")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 200, height: 200)
+            Text(viewModel.errorMessage ?? "" )
+                .foregroundColor(.red)
+                .padding()
+        }
     }
     
     @ViewBuilder private func renderButtonView() -> some View {
@@ -103,8 +108,10 @@ struct WeatherView: View {
                             renderLandscapeView(withWeather: weather)
                         }
                         
-                    } else {
-                        renderErrorView()     .accessibilityIdentifier("errorMessageView")
+                    } else if viewModel.errorMessage != nil{
+                        
+                        renderErrorView()
+                            .accessibilityIdentifier("errorMessageView")
                     }
                     
                     renderButtonView()

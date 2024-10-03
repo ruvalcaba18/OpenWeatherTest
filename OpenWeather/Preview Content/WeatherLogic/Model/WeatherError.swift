@@ -13,6 +13,7 @@ enum WeatherError: LocalizedError, Equatable {
     case networkError(String)
     case decodingError
     case locationUnavailable
+    case noInternetConnection
     
     var errorDescription: String? {
         switch self {
@@ -24,6 +25,8 @@ enum WeatherError: LocalizedError, Equatable {
             return "Failed to decode the weather data. Please try again."
         case .locationUnavailable:
             return "Could not determine your location."
+        case .noInternetConnection:
+            return "No internet connection available, Please check your connection."
         }
     }
     
