@@ -7,11 +7,13 @@
 
 import Foundation
 import Combine
+import SwiftUI
 
 @MainActor final class WeatherViewModel: ObservableObject {
     
     private let weatherManager: WeatherManager
     private let locationManager: LocationManager
+    private let imageCache = ImageCacheManager.shared
     
     @Published var weather: Weather?
     @Published var errorMessage: String? = nil
@@ -41,9 +43,10 @@ import Combine
         
         isLoading = true
         errorMessage = nil
+        
         do {
             weather = try await weatherManager.getWeather(for: city)
-            errorMessage = ""
+            errorMessage = nil
             
         } catch let error  {
             handleError(error)
@@ -65,7 +68,7 @@ import Combine
         
         do {
             weather = try await weatherManager.getWeather(for: location)
-            errorMessage = ""
+            errorMessage = nil
         } catch let error{
             handleError(error)
         }
@@ -99,10 +102,55 @@ import Combine
     }
     
     private func handleError(_ error: Error) {
+        weather = nil
         if let error = error as? WeatherError {
             errorMessage = error.localizedDescription
         } else {
             errorMessage = "Unexpected error: \(error.localizedDescription)"
         }
     }
+    
+     func fetchWeatherIcon(from weatherData: Weather) async -> UIImage? {
+        
+         do {
+             guard let iconCode = weatherData.weather.first?.icon else {
+                 errorMessage = "Icon code not found"
+                 return nil
+             }
+             guard let iconURL = URL(string: "https://openweathermap.org/img/wn/\(iconCode)@2x.png") else {
+                 errorMessage = "Invalid icon URL"
+                 return nil
+             }
+             
+             if let cachedImage = imageCache.getImage(for: iconURL) {
+                 return cachedImage
+             } else {
+                 return try await downloadWeatherIcon(from: iconURL)
+             }
+         } catch {
+             handleError(error)
+             return nil
+         }
+    }
+    
+    private func downloadWeatherIcon(from url: URL) async throws -> UIImage? {
+        
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            
+            if let downloadedImage = UIImage(data: data) {
+                imageCache.setImage(downloadedImage, for: url)
+                return downloadedImage
+            } else {
+                errorMessage = "Failed to convert data to image"
+                return nil
+            }
+        } catch {
+            handleError(error)
+            return nil
+        }
+        
+    }
+
+    
 }

@@ -62,7 +62,7 @@ struct WeatherView: View {
             
             WeatherDetailsView(weather: weather)
             
-            WeatherIconView(weather: weather)
+            WeatherIconView(weatherData: weather, viewModel: viewModel)
         }
     }
     
@@ -75,7 +75,7 @@ struct WeatherView: View {
             
             Spacer()
             
-            WeatherIconView(weather: weather)
+            WeatherIconView(weatherData: weather, viewModel: viewModel)
                 .frame(width: 200, height: 200)
                 .padding()
         }

@@ -9,18 +9,51 @@ import SwiftUI
 
 struct WeatherIconView: View {
     
-    let weather: Weather
+    let weatherData: Weather
+    @State private var weatherImage: UIImage? = nil
+    @ObservedObject var viewModel: WeatherViewModel
     
-    var body: some View {
+    
+    internal var imageCache = ImageCacheManager.shared
+    
+    init(weatherData: Weather, viewModel: WeatherViewModel) {
+        self.weatherData = weatherData
+        self._viewModel = ObservedObject(wrappedValue: viewModel)
+    }
+    
+    @ViewBuilder func renderWeatherIcon() -> some View {
         
-        AsyncImage(url: URL(string: "https://openweathermap.org/img/wn/\(weather.weather.first?.icon ?? "")@2x.png"))
-            .frame(width: 300, height: 300)
+        VStack {
+            
+            if let iconImage = weatherImage {
+                
+                Image(uiImage: iconImage)
+                    .resizable()
+                    .frame(width: 300,height: 300)
+                    .accessibilityIdentifier("weatherIconImage")
+                
+                
+            } else {
+                
+                ProgressView()
+                    .controlSize(.large)
+                    .task {
+                        self.weatherImage = await viewModel.fetchWeatherIcon(from: weatherData)
+                    }
+                
+            }
+        }
+    }
+    
+   
+    var body: some View {
+
+        renderWeatherIcon()
             .padding()
-            .accessibilityIdentifier("weatherIconImage")
         
     }
 }
 
 #Preview {
-    WeatherIconView(weather: .defaultWeather)
+    WeatherIconView(weatherData: .defaultWeather, viewModel: WeatherViewModel(weatherManager: WeatherManager(), locationManager: LocationManager()))
 }

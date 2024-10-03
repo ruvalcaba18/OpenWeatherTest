@@ -13,24 +13,17 @@ final class WeatherManager {
     
     private func performRequest(with urlString: String) async throws -> Weather {
         
-        guard let url = URL(string: urlString) else {
-            throw WeatherError.invalidURL
-        }
+        guard let url = URL(string: urlString) else { throw WeatherError.invalidURL }
         
         do {
             
             let (data, response) = try await URLSession.shared.data(from: url)
             
-            
             guard let httpResponse = response as? HTTPURLResponse, 200..<300 ~= httpResponse.statusCode else {
                 throw WeatherError.networkError("Invalid response from the server.")
             }
             
-            do {
-                return try JSONDecoder().decode(Weather.self, from: data)
-            } catch {
-                throw WeatherError.decodingError
-            }
+            return try JSONDecoder().decode(Weather.self, from: data)
             
         } catch let urlError as URLError {
           
@@ -41,6 +34,7 @@ final class WeatherManager {
             }
             
         } catch {
+            
             throw WeatherError.networkError(error.localizedDescription)
         }
         
